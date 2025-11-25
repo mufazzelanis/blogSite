@@ -2,44 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+    // Show all posts with form
     public function index()
     {
-        $posts = Post::with(['category', 'user'])->latest()->get();
+        $posts = Post::with(['category', 'tags'])->latest()->paginate(8);
 
-        return view('post.index', compact('posts'));
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('posts.index', compact('posts', 'categories', 'tags'));
     }
 
-    public function create()
-    {
-        return view('post.create', [
-            'categories' => Category::all(),
-            'tags' => Tag::all(),
-        ]);
-    }
-
+    // Store new post
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required',
-            'category_id' => 'required',
-            'content' => 'required',
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'content' => 'required|string',
+            'tags' => 'required|array',
         ]);
 
-        $post = Post::create([
-            'user_id' => auth()->id(),
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'content' => $request->content,
-        ]);
+        $post = new Post;
+        $post->title = $request->title;
+        $post->category_id = $request->category_id;
+        $post->content = $request->content;
+        $post->user_id = auth()->id() ?? 1;
+        $post->slug = Str::slug($request->title);
+        $post->save();
 
-        $post->tags()->sync($request->tags);
+        if ($request->tags) {
+            $post->tags()->sync($request->tags); // attach selected tags
+        }
 
-        return redirect()->route('posts.index');
+        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
+
     }
 }
