@@ -12,7 +12,6 @@ class PostFactory extends Factory
     {
         return [
             'title' => fake()->sentence(5),
-            'slug' => fake()->unique()->slug(),
             'content' => fake()->paragraph(6),
             'user_id' => User::factory(),
             'category_id' => Category::factory(),

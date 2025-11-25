@@ -12,7 +12,7 @@ class PostSeeder extends Seeder
     public function run(): void
     {
         // Create 50 posts
-        Post::factory(50)->create()->each(function ($post) {
+        Post::factory(20)->create()->each(function ($post) {
             // Attach random tags (1–5 tags)
             $post->tags()->attach(
                 Tag::inRandomOrder()->take(rand(1, 5))->pluck('id')
