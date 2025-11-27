@@ -21,7 +21,6 @@ class PostController extends Controller
         return view('posts.index', compact('posts', 'categories', 'tags'));
     }
 
-    // Store new post
     public function store(Request $request)
     {
         $request->validate([
@@ -40,7 +39,7 @@ class PostController extends Controller
         $post->save();
 
         if ($request->tags) {
-            $post->tags()->sync($request->tags); // attach selected tags
+            $post->tags()->sync($request->tags); 
         }
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully!');
